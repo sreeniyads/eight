@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  auth-service:
+    build: ./auth-service
+    container_name: auth-service
+    ports:
+      - "8081:8081"
+
+  dashboard-service:
+    build: ./dashboard-service
+    container_name: dashboard-service
+    ports:
+      - "8082:8082"
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - auth-service
+      - dashboard-service

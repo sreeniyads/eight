@@ -1,0 +1,50 @@
+name: CI/CD for Angular + Spring Boot Microservices
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📦 Checkout code
+        uses: actions/checkout@v4
+
+      - name: ☕ Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: 🧰 Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 🧱 Build Angular app
+        working-directory: angular-app
+        run: |
+          npm ci
+          npm run build --prod
+
+      - name: 🚀 Build Auth Service
+        working-directory: back-end/auth-service
+        run: mvn clean package -DskipTests
+
+      - name: 🚀 Build Dashboard Service
+        working-directory: back-end/dashboard-service
+        run: mvn clean package -DskipTests
+
+      - name: 🚀 Build API Gateway
+        working-directory: back-end/api-gateway
+        run: mvn clean package -DskipTests
+
+      - name: 🐳 Build Docker images
+        run: |
+          docker build -t auth-service ./back-end/auth-service
+          docker build -t dashboard-service ./back-end/dashboard-service
+          docker build -t api-gateway ./back-end/api-gateway
